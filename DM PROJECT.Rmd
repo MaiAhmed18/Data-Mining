@@ -1,0 +1,61 @@
+---
+title: "DM PROJECT"
+author: "Mai"
+date: "1/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(factoextra)
+library(propagate)
+library(ggpubr)
+library(arules)
+library(arulesViz)
+library(ISLR)
+library(tidyverse)
+library(datarium)
+library(party)
+library(neuralnet)
+library(caret)
+library(reshape2)
+library(ggplot2)
+getwd()
+```
+
+```{r}
+data <- read.csv('House_Predict.csv')
+nrow(data)
+any(is.na(data))  ##check if there null values
+
+str(data)  ##explore dataset
+
+## descripe price variable
+boxplot(data$SalePrice)
+hist(data$SalePrice)
+skewness(data$SalePrice)
+
+## correlation btw variables to get the independent variables which have more correlation with price variable
+m <- cor(data[,unlist(lapply(data, is.numeric))])
+n <- melt(m)
+## plotting correlation matrix
+ggplot(data = n, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+
+## Multible linear regression task
+set.seed(100)
+##split
+index <- sample(1:nrow(data),0.8*nrow(data))
+traindata <- data[index, ]
+testdata <- data[-index,]
+traindatalinear <- lm(SalePrice ~ GrLivArea+X1stFlrSF+FullBath+OverallQual+TotalBsmtSF  ,data=traindata)
+
+testdatalinear <- predict(traindatalinear,testdata)
+
+summary(traindatalinear)
+summary(testdatalinear)
+mean((testdata$SalePrice - testdatalinear)^2)
+write.csv(testdatalinear,"C:/Users/hpp/OneDrive/Documents/price_test.csv")
+
+```
+
